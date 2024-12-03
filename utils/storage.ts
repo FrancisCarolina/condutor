@@ -52,3 +52,12 @@ export async function obterUserId(): Promise<string | null> {
         return null;
     }
 }
+
+export async function obterToken(): Promise<string | null> {
+    try {
+        return await AsyncStorage.getItem('authToken');
+    } catch (error) {
+        console.error('Erro ao obter o token do usuário:', error);
+        return null;
+    }
+}

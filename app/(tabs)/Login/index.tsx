@@ -20,11 +20,9 @@ export default function LoginScreen() {
 
             const { token, id } = response.data;
 
-            // Armazena o token e o ID do usuário
             await logar(token, id);
 
-            Alert.alert("Login bem-sucedido", "Bem-vindo!");
-            //navigate("/dashboard");
+            navigate("/home");
         } catch (error) {
             Alert.alert("Erro", "Credenciais inválidas.");
         }
