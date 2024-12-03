@@ -25,10 +25,9 @@ export default function RegisterScreen() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        //axios.get("http:/ / localhost: 8000 / locais")
-        //.then(response => setLocals(response.data))
-        //.catch (() => Alert.alert("Erro", "Não foi possível carregar os locais."));
-        setLocals([{ id: "1", nome: "IFPR" }, { id: "2", nome: "Estacionameto X" }])
+        axios.get("http://192.168.100.103:8000/locais")
+            .then(response => setLocals(response.data))
+            .catch(() => Alert.alert("Erro", "Não foi possível carregar os locais."));
     }, []);
 
     const validateEmail = (email: string) => {
@@ -113,16 +112,18 @@ export default function RegisterScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
             />
-            <Picker
-                selectedValue={local}
-                onValueChange={(itemValue) => setLocal(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Selecione o Local" value="0" />
-                {locals.map((loc) => (
-                    <Picker.Item key={loc.id} label={loc.nome} value={loc.id} />
-                ))}
-            </Picker>
+            <View style={styles.pickerContainer}>
+                <Picker
+                    selectedValue={local}
+                    onValueChange={(itemValue) => setLocal(itemValue)}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Selecione o Local" value="0" />
+                    {locals.map((loc) => (
+                        <Picker.Item key={loc.id} label={loc.nome} value={loc.id} />
+                    ))}
+                </Picker>
+            </View>
             <InputField
                 label="Senha"
                 value={password}
@@ -152,17 +153,20 @@ const styles = StyleSheet.create({
         left: 20,
         zIndex: 1,
     },
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: "gray",
+        borderRadius: 5,
+        marginVertical: 10,
+        overflow: "hidden"
+    },
     picker: {
         height: 50,
-        marginVertical: 10,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        paddingHorizontal: 10,
+        width: "100%",
     },
     input: {
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: "gray",
         borderRadius: 5,
         padding: 10,
         marginVertical: 10,

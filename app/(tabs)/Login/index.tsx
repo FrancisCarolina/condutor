@@ -3,29 +3,42 @@ import { View, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 import CustomButton from "@/components/Button";
 import InputField from "@/components/InputField";
 import { useNavigate } from "react-router-native"; // Usando useNavigate do react-router-native
+import axios from "axios";
+import { logar } from "@/utils/storage";
 
 export default function LoginScreen() {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const navigate = useNavigate(); // Substituindo useNavigation do react-navigation
 
-    const handleLogin = () => {
-        if (username === "admin" && password === "password") {
-            Alert.alert("Login Successful", "Welcome!");
-        } else {
-            Alert.alert("Login Failed", "Please check your credentials.");
+    async function handleLogin() {
+        try {
+            const response = await axios.post("http://192.168.100.103:8000/login", {
+                login: username,
+                senha: password,
+            });
+
+            const { token, id } = response.data;
+
+            // Armazena o token e o ID do usuário
+            await logar(token, id);
+
+            Alert.alert("Login bem-sucedido", "Bem-vindo!");
+            //navigate("/dashboard");
+        } catch (error) {
+            Alert.alert("Erro", "Credenciais inválidas.");
         }
-    };
+    }
 
     return (
         <View style={styles.container}>
             <InputField
-                label="Username"
+                label="Email"
                 value={username}
                 onChangeText={setUsername}
             />
             <InputField
-                label="Password"
+                label="Senha"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
