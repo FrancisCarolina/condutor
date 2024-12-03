@@ -13,18 +13,36 @@ export default function LoginScreen() {
 
     async function handleLogin() {
         try {
-            const response = await axios.post("http://192.168.100.103:8000/login", {
+            // Requisição para login
+            const loginResponse = await axios.post("http://192.168.100.103:8000/login", {
                 login: username,
                 senha: password,
             });
 
-            const { token, id } = response.data;
+            const { token, id } = loginResponse.data;
 
+            // Requisição para buscar o usuário e verificar o role_id
+            const userResponse = await axios.get(`http://192.168.100.103:8000/usuario/${id}`, {
+                headers: {
+                    "x-access-token": token,
+                },
+            });
+
+            const { role_id } = userResponse.data;
+
+            if (role_id !== 2) {
+                Alert.alert("Erro", "Acesso permitido apenas para condutores");
+                return;
+            }
+
+            // Salva o token e o ID do usuário
             await logar(token, id);
 
+            // Redireciona para a tela inicial
             navigate("/home");
         } catch (error) {
-            Alert.alert("Erro", "Credenciais inválidas.");
+            console.error("Erro ao realizar login:", error);
+            Alert.alert("Erro", "Credenciais inválidas ou problema ao validar o acesso.");
         }
     }
 
