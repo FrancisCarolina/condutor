@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, Button } from "react-native";
 import { useNavigate } from "react-router-native";
-import QRCode from "react-native-qrcode-svg"; // Importando o componente QRCode
+import QRCode from "react-native-qrcode-svg";
 import { obterUserId, obterToken, deslogar } from "@/utils/storage";
 import axios from "axios";
 
 export default function HomePage() {
     const [userName, setUserName] = useState<string | null>(null);
-    const [hashCode, setHashCode] = useState<string | null>(null); // Adicionando o estado para o hash
+    const [hashCode, setHashCode] = useState<string | null>(null);
+    const [isActive, setIsActive] = useState<boolean | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,8 +31,11 @@ export default function HomePage() {
                     }
                 );
 
-                setUserName(response.data.nome);
-                setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q"); // Supondo que o código hash venha na resposta
+                const { nome, ativo } = response.data;
+
+                setUserName(nome);
+                setIsActive(ativo);
+                setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q");
             } catch (error) {
                 console.error("Erro ao buscar informações do usuário:", error);
                 Alert.alert("Erro", "Não foi possível carregar as informações do usuário.");
@@ -56,21 +60,26 @@ export default function HomePage() {
             {userName ? (
                 <>
                     <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
-                    {hashCode && ( // Exibe o QR Code somente se o hash estiver disponível
-                        <QRCode
-                            value={hashCode}
-                            size={350} // Tamanho do QR Code
-                            backgroundColor="#ffffff"
-                            color="#000000"
-                        />
+                    {isActive ? (
+                        hashCode && (
+                            <QRCode
+                                value={hashCode}
+                                size={350}
+                                backgroundColor="#ffffff"
+                                color="#000000"
+                            />
+                        )
+                    ) : (
+                        <Text style={styles.inactiveText}>
+                            Sua conta está inativa. Entre em contato com o administrador para ativá-la.
+                        </Text>
                     )}
                     <Button title="Sair" onPress={handleLogout} color="#FF0000" />
                 </>
             ) : (
                 <Text style={styles.loadingText}>Carregando...</Text>
-            )
-            }
-        </View >
+            )}
+        </View>
     );
 }
 
@@ -81,9 +90,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#f8f9fa",
     },
-    qrcode: {
-        padding: 10
-    },
     welcomeText: {
         fontSize: 24,
         fontWeight: "bold",
@@ -93,5 +99,11 @@ const styles = StyleSheet.create({
     loadingText: {
         fontSize: 18,
         color: "#666",
+    },
+    inactiveText: {
+        fontSize: 18,
+        color: "#FF0000",
+        textAlign: "center",
+        marginVertical: 20,
     },
 });
