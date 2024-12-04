@@ -5,6 +5,9 @@ import InputField from "@/components/InputField";
 import { useNavigate } from "react-router-native"; // Usando useNavigate do react-router-native
 import axios from "axios";
 import { logar } from "@/utils/storage";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function LoginScreen() {
     const [username, setUsername] = useState<string>("");
@@ -14,7 +17,7 @@ export default function LoginScreen() {
     async function handleLogin() {
         try {
             // Requisição para login
-            const loginResponse = await axios.post("http://192.168.100.103:8000/login", {
+            const loginResponse = await axios.post(`${API_URL}/login`, {
                 login: username,
                 senha: password,
             });
@@ -22,7 +25,7 @@ export default function LoginScreen() {
             const { token, id } = loginResponse.data;
 
             // Requisição para buscar o usuário e verificar o role_id
-            const userResponse = await axios.get(`http://192.168.100.103:8000/usuario/${id}`, {
+            const userResponse = await axios.get(`${API_URL}/usuario/${id}`, {
                 headers: {
                     "x-access-token": token,
                 },

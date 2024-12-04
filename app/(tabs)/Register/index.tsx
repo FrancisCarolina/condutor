@@ -13,6 +13,9 @@ import { useNavigate } from "react-router-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { TextInputMask } from "react-native-masked-text";
 import axios from "axios";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function RegisterScreen() {
     const [name, setName] = useState<string>("");
@@ -25,7 +28,7 @@ export default function RegisterScreen() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("http://192.168.100.103:8000/locais")
+        axios.get(`${API_URL}/locais`)
             .then(response => setLocals(response.data))
             .catch(() => Alert.alert("Erro", "Não foi possível carregar os locais."));
     }, []);
@@ -71,7 +74,7 @@ export default function RegisterScreen() {
         console.log("Corpo da requisição:", body);
 
         try {
-            const response = await axios.post("http://192.168.100.103:8000/condutor", body, {
+            const response = await axios.post(`${API_URL}/condutor`, body, {
                 headers: { "Content-Type": "application/json" },
             });
 

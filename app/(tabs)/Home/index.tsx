@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-native";
 import QRCode from "react-native-qrcode-svg";
 import { obterUserId, obterToken, deslogar } from "@/utils/storage";
 import axios from "axios";
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function HomePage() {
     const [userName, setUserName] = useState<string | null>(null);
@@ -23,7 +26,7 @@ export default function HomePage() {
                 }
 
                 const response = await axios.get(
-                    `http://192.168.100.103:8000/condutor/user/${userId}`,
+                    `${API_URL}/condutor/user/${userId}`,
                     {
                         headers: {
                             "x-access-token": token,
