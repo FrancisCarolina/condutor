@@ -50,6 +50,11 @@ export default function HomePage() {
                         }
                     );
                     setVeiculos(responseVeiculos.data);
+                    const veiculoAtivo = responseVeiculos.data.find((veiculo: any) => veiculo.ativo);
+                    if (veiculoAtivo) {
+                        setSelectedVeiculo(veiculoAtivo.id);
+                        setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q");
+                    }
                 }
 
                 setIsActive(ativo);
@@ -73,7 +78,10 @@ export default function HomePage() {
     };
 
     const selecionaVeiculo = (id: number) => {
+        //deixar inativo se algum selecionado antes
         setSelectedVeiculo(id)
+        //ativar o veiculo selecionado
+        //gerar codigo hash com o veículo selecionado
         setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q");
     }
 
