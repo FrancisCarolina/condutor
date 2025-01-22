@@ -14,6 +14,7 @@ export default function HomePage() {
     const [hashCode, setHashCode] = useState<string | null>(null);
     const [isActive, setIsActive] = useState<boolean | null>(null);
     const [veiculos, setVeiculos] = useState<any[]>([]);
+    const [condutorId, setCondutorId] = useState(null);
     const [selectedVeiculo, setSelectedVeiculo] = useState<number | null>(null); // Estado para armazenar o veículo selecionado
     const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ export default function HomePage() {
 
                 if (!userId || !token) {
                     Alert.alert("Erro", "Usuário ou token não encontrado.");
+                    handleLogout();
                     return;
                 }
 
@@ -38,9 +40,9 @@ export default function HomePage() {
                 );
 
                 const { nome, ativo, id } = response.data;
+                setCondutorId(id);
                 setUserName(nome);
                 if (nome) {
-
                     const responseVeiculos = await axios.get(
                         `${API_URL}/veiculo/condutor/${id}`,
                         {
@@ -49,17 +51,20 @@ export default function HomePage() {
                             },
                         }
                     );
+
                     setVeiculos(responseVeiculos.data);
-                    const veiculoAtivo = responseVeiculos.data.find((veiculo: any) => veiculo.ativo);
-                    if (veiculoAtivo) {
-                        setSelectedVeiculo(veiculoAtivo.id);
-                        setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q");
+                    // Definir o veículo em uso inicialmente
+                    const veiculoEmUso = responseVeiculos.data.find((veiculo: any) => veiculo.em_uso);
+                    if (veiculoEmUso) {
+                        gerarCodigo(veiculoEmUso.id, id);
+                        setSelectedVeiculo(veiculoEmUso.id);
                     }
                 }
 
                 setIsActive(ativo);
 
             } catch (error) {
+                handleLogout();
                 console.error("Erro ao buscar informações do usuário:", error);
             }
         };
@@ -77,13 +82,73 @@ export default function HomePage() {
         }
     };
 
-    const selecionaVeiculo = (id: number) => {
-        //deixar inativo se algum selecionado antes
-        setSelectedVeiculo(id)
-        //ativar o veiculo selecionado
-        //gerar codigo hash com o veículo selecionado
-        setHashCode("$2a$10$tw2R6xF/6F6ceiunSdlxjOCbIuTM264fQ4/YbJ6Jq.xxHVc9QN/7q");
-    }
+    const gerarCodigo = async (idVeiculo: number, idCondutor: number | null) => {
+        try {
+            const token = await obterToken();
+
+            if (!token) {
+                Alert.alert("Erro", "Token não encontrado.");
+                return;
+            }
+            if (!idCondutor) {
+
+                Alert.alert("Erro", "Condutor não encontrado.");
+                return;
+            }
+
+            // Enviar o PUT para atualizar o veículo em uso
+            console.log(`${API_URL}/condutor/${idCondutor}/codigo`);
+
+
+            const response = await axios.post(
+                `${API_URL}/condutor/${idCondutor}/codigo`,
+                { veiculo_id: idVeiculo },
+                {
+                    headers: {
+                        "x-access-token": token,
+                    },
+                }
+            );
+
+            // Atualizar o estado local com o veículo selecionado
+            console.log("data: ", response.data.codigo);
+
+            setHashCode(response.data.codigo);
+        } catch (error) {
+            console.error("Erro ao gerar codigo:", error);
+            Alert.alert("Erro", "Não foi possível gerar o código.");
+        }
+    };
+
+    const handleSelectVeiculo = async (idVeiculo: number) => {
+        try {
+            const token = await obterToken();
+
+            if (!token) {
+                Alert.alert("Erro", "Token não encontrado.");
+                return;
+            }
+
+            // Enviar o PUT para atualizar o veículo em uso
+            await axios.put(
+                `${API_URL}/condutor/${condutorId}/mudarVeiculoEmUso`,
+                { veiculo_em_uso: idVeiculo },
+                {
+                    headers: {
+                        "x-access-token": token,
+                    },
+                }
+            );
+
+            // Atualizar o estado local com o veículo selecionado
+            setSelectedVeiculo(idVeiculo);
+            gerarCodigo(idVeiculo, condutorId);
+            Alert.alert("Sucesso", "Veículo alterado com sucesso.");
+        } catch (error) {
+            console.error("Erro ao alterar veículo:", error);
+            Alert.alert("Erro", "Não foi possível alterar o veículo.");
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -100,37 +165,27 @@ export default function HomePage() {
                                     color="#000000"
                                 />
                             ) : (
-                                <>
-                                    {veiculos.length > 0 ? (
-                                        <Text style={styles.infoText}>
-                                            Selecione um veículo para gerar seu código de acesso.
-                                        </Text>
-                                    ) : (
-                                        <Text style={styles.infoText}>
-                                            Cadastre um veículo para gerar seu código de acesso.
-                                        </Text>
-                                    )}
-                                </>
+                                <Text style={styles.infoText}>
+                                    Cadastre um veículo para gerar seu código de acesso.
+                                </Text>
                             )}
 
-                            {/* Lista de veículos somente se a conta estiver ativa */}
-                            {veiculos.length > 0 && (
-                                <View style={styles.veiculoList}>
-                                    <Text style={styles.veiculoListTitle}>Selecione seu veículo ativo:</Text>
-                                    <ScrollView>
-                                        {veiculos.map((veiculo) => (
-                                            <View key={veiculo.id} style={styles.veiculoItem}>
-                                                <RadioButton
-                                                    value={veiculo.id}
-                                                    status={selectedVeiculo === veiculo.id ? "checked" : "unchecked"}
-                                                    onPress={() => selecionaVeiculo(veiculo.id)} // Atualiza o veículo selecionado
-                                                />
-                                                <Text>{veiculo.modelo} - {veiculo.placa}</Text>
-                                            </View>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            )}
+                            {/* Lista de veículos com RadioButton */}
+                            <View style={styles.veiculoList}>
+                                <Text style={styles.veiculoListTitle}>Selecione o veículo em uso:</Text>
+                                <ScrollView>
+                                    {veiculos.map((veiculo) => (
+                                        <View key={veiculo.id} style={styles.veiculoItem}>
+                                            <RadioButton
+                                                value={veiculo.id.toString()}
+                                                status={selectedVeiculo === veiculo.id ? 'checked' : 'unchecked'}
+                                                onPress={() => handleSelectVeiculo(veiculo.id)} // Desabilita o RadioButton se o veículo não estiver em uso
+                                            />
+                                            <Text>{veiculo.modelo} ({veiculo.placa})</Text>
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                            </View>
                         </>
                     ) : (
                         <Text style={styles.inactiveText}>
