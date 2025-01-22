@@ -108,21 +108,19 @@ export default function ChangeCredentialsScreen() {
                 onChangeText={setLogin}
                 keyboardType="email-address"
             />
-            <View style={styles.passwordContainer}>
-                <InputField
-                    label="Nova Senha"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!isPasswordVisible}
+            <InputField
+                label="Nova Senha"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible}
+            />
+            <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeOne}>
+                <Ionicons
+                    name={isPasswordVisible ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
                 />
-                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeOne}>
-                    <Ionicons
-                        name={isPasswordVisible ? "eye-off" : "eye"}
-                        size={24}
-                        color="gray"
-                    />
-                </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
             <InputField
                 label="Confirmar Senha"
                 value={confirmPassword}
