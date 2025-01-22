@@ -35,10 +35,9 @@ export default function HomePage() {
                     const loginParts = login.split('@');
                     console.log(loginParts);
 
+
                     if (loginParts.length <= 1) {
-                        console.log("O login não contém '@'.");
-                    } else {
-                        console.log("Login válido com '@'.");
+                        navigate("/changeLogin");
                     }
                 } else {
                     console.log("Login não encontrado ou inválido.");
