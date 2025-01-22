@@ -19,6 +19,35 @@ export default function HomePage() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const verificarSeLoginAlterado = async (userId: string, token: string) => {
+            try {
+                const response = await axios.get(
+                    `${API_URL}/usuario/${userId}`,
+                    {
+                        headers: {
+                            "x-access-token": token,
+                        },
+                    }
+                );
+                const { login } = response.data;
+                if (login) {
+                    // Verifique se o login contém o símbolo "@" e divida corretamente
+                    const loginParts = login.split('@');
+                    console.log(loginParts);
+
+                    if (loginParts.length <= 1) {
+                        console.log("O login não contém '@'.");
+                    } else {
+                        console.log("Login válido com '@'.");
+                    }
+                } else {
+                    console.log("Login não encontrado ou inválido.");
+                }
+            } catch (error) {
+                handleLogout();
+                console.error("Erro ao buscar informações do usuário:", error);
+            }
+        }
         const fetchUserData = async () => {
             try {
                 const userId = await obterUserId();
@@ -29,6 +58,8 @@ export default function HomePage() {
                     handleLogout();
                     return;
                 }
+
+                verificarSeLoginAlterado(userId, token);
 
                 const response = await axios.get(
                     `${API_URL}/condutor/user/${userId}`,
