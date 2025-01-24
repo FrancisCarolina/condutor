@@ -72,22 +72,26 @@ export default function HomePage() {
                 const { nome, ativo, id } = response.data;
                 setCondutorId(id);
                 setUserName(nome);
-                if (nome) {
-                    const responseVeiculos = await axios.get(
-                        `${API_URL}/veiculo/condutor/${id}`,
-                        {
-                            headers: {
-                                "x-access-token": token,
-                            },
-                        }
-                    );
+                if (nome && ativo) {
+                    try {
+                        const responseVeiculos = await axios.get(
+                            `${API_URL}/veiculo/condutor/${id}`,
+                            {
+                                headers: {
+                                    "x-access-token": token,
+                                },
+                            }
+                        );
 
-                    setVeiculos(responseVeiculos.data);
-                    // Definir o veículo em uso inicialmente
-                    const veiculoEmUso = responseVeiculos.data.find((veiculo: any) => veiculo.em_uso);
-                    if (veiculoEmUso) {
-                        gerarCodigo(veiculoEmUso.id, id);
-                        setSelectedVeiculo(veiculoEmUso.id);
+                        setVeiculos(responseVeiculos.data);
+                        // Definir o veículo em uso inicialmente
+                        const veiculoEmUso = responseVeiculos.data.find((veiculo: any) => veiculo.em_uso);
+                        if (veiculoEmUso) {
+                            gerarCodigo(veiculoEmUso.id, id);
+                            setSelectedVeiculo(veiculoEmUso.id);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao buscar informações do veículo:", error);
                     }
                 }
 
