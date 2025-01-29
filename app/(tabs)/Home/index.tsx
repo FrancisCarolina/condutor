@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, Image, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Alert, Image, ScrollView, ActivityIndicator } from "react-native"; // Importe o ActivityIndicator
 import { useNavigate } from "react-router-native";
 import QRCode from "react-native-qrcode-svg";
 import { obterUserId, obterToken, deslogar } from "@/utils/storage";
@@ -196,7 +196,7 @@ export default function HomePage() {
                         </View>
 
                         {isActive ? (
-                            <>
+                            <View style={styles.userContent}>
                                 {hashCode ? (
                                     <QRCode
                                         value={hashCode}
@@ -226,7 +226,7 @@ export default function HomePage() {
                                         ))}
                                     </ScrollView>
                                 </View>
-                            </>
+                            </View>
                         ) : (
                             <View style={styles.containerNoUser} >
                                 <View style={styles.imagemContainer}>
@@ -243,10 +243,10 @@ export default function HomePage() {
                     </>
                 ) : (
                     <View style={styles.containerNoUser} >
-                        <Text style={styles.loadingText}>Carregando...</Text>
+                        {/* Substituindo o texto por um ActivityIndicator */}
+                        <ActivityIndicator size="large" color="#6950a5" />
                     </View>
-                )
-                }
+                )}
             </View >
         </Provider >
     );
@@ -280,6 +280,8 @@ const styles = StyleSheet.create({
     imagemContainer: {
         display: 'flex',
         width: '100%',
+    }, userContent: {
+        display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60
     },
     logo: {
         width: "100%",
