@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, Button, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Alert, Image, ScrollView } from "react-native";
 import { useNavigate } from "react-router-native";
 import QRCode from "react-native-qrcode-svg";
 import { obterUserId, obterToken, deslogar } from "@/utils/storage";
 import axios from "axios";
 import Constants from 'expo-constants';
-import { RadioButton } from 'react-native-paper';
+import { RadioButton, Menu, Divider, IconButton, Provider } from 'react-native-paper'; // Importando o Provider
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -15,7 +15,8 @@ export default function HomePage() {
     const [isActive, setIsActive] = useState<boolean | null>(null);
     const [veiculos, setVeiculos] = useState<any[]>([]);
     const [condutorId, setCondutorId] = useState(null);
-    const [selectedVeiculo, setSelectedVeiculo] = useState<number | null>(null); // Estado para armazenar o veículo selecionado
+    const [selectedVeiculo, setSelectedVeiculo] = useState<number | null>(null);
+    const [menuVisible, setMenuVisible] = useState(false); // Estado para controlar a visibilidade do menu
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,10 +32,8 @@ export default function HomePage() {
                 );
                 const { login } = response.data;
                 if (login) {
-                    // Verifique se o login contém o símbolo "@" e divida corretamente
                     const loginParts = login.split('@');
                     console.log(loginParts);
-
 
                     if (loginParts.length <= 1) {
                         navigate("/changeLogin");
@@ -46,7 +45,8 @@ export default function HomePage() {
                 handleLogout();
                 console.error("Erro ao buscar informações do usuário:", error);
             }
-        }
+        };
+
         const fetchUserData = async () => {
             try {
                 const userId = await obterUserId();
@@ -84,7 +84,6 @@ export default function HomePage() {
                         );
 
                         setVeiculos(responseVeiculos.data);
-                        // Definir o veículo em uso inicialmente
                         const veiculoEmUso = responseVeiculos.data.find((veiculo: any) => veiculo.em_uso);
                         if (veiculoEmUso) {
                             gerarCodigo(veiculoEmUso.id, id);
@@ -125,14 +124,9 @@ export default function HomePage() {
                 return;
             }
             if (!idCondutor) {
-
                 Alert.alert("Erro", "Condutor não encontrado.");
                 return;
             }
-
-            // Enviar o PUT para atualizar o veículo em uso
-            console.log(`${API_URL}/condutor/${idCondutor}/codigo`);
-
 
             const response = await axios.post(
                 `${API_URL}/condutor/${idCondutor}/codigo`,
@@ -143,9 +137,6 @@ export default function HomePage() {
                     },
                 }
             );
-
-            // Atualizar o estado local com o veículo selecionado
-            console.log("data: ", response.data.codigo);
 
             setHashCode(response.data.codigo);
         } catch (error) {
@@ -163,7 +154,6 @@ export default function HomePage() {
                 return;
             }
 
-            // Enviar o PUT para atualizar o veículo em uso
             await axios.put(
                 `${API_URL}/condutor/${condutorId}/mudarVeiculoEmUso`,
                 { veiculo_em_uso: idVeiculo },
@@ -174,7 +164,6 @@ export default function HomePage() {
                 }
             );
 
-            // Atualizar o estado local com o veículo selecionado
             setSelectedVeiculo(idVeiculo);
             gerarCodigo(idVeiculo, condutorId);
             Alert.alert("Sucesso", "Veículo alterado com sucesso.");
@@ -185,69 +174,116 @@ export default function HomePage() {
     };
 
     return (
-        <View style={styles.container}>
-            {userName ? (
-                <>
-                    <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
-                    {isActive ? (
-                        <>
-                            {hashCode ? (
-                                <QRCode
-                                    value={hashCode}
-                                    size={350}
-                                    backgroundColor="#ffffff"
-                                    color="#000000"
-                                />
-                            ) : (
-                                <Text style={styles.infoText}>
-                                    Cadastre um veículo para gerar seu código de acesso.
+        <Provider> {/* Adicionando o Provider aqui */}
+            <View style={styles.container}>
+                {userName ? (
+                    <>
+                        <View style={styles.menuSuperior}>
+                            <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                            <Menu
+                                visible={menuVisible}
+                                onDismiss={() => setMenuVisible(false)}
+                                anchor={
+                                    <IconButton
+                                        icon="dots-vertical"
+                                        onPress={() => setMenuVisible(true)}
+                                    />
+                                }
+                            >
+                                <Menu.Item onPress={handleLogout} title="Logout" />
+                                <Divider />
+                            </Menu>
+                        </View>
+
+                        {isActive ? (
+                            <>
+                                {hashCode ? (
+                                    <QRCode
+                                        value={hashCode}
+                                        size={350}
+                                        backgroundColor="#ffffff"
+                                        color="#000000"
+                                    />
+                                ) : (
+                                    <Text style={styles.infoText}>
+                                        Cadastre um veículo para gerar seu código de acesso.
+                                    </Text>
+                                )}
+
+                                {/* Lista de veículos com RadioButton */}
+                                <View style={styles.veiculoList}>
+                                    <Text style={styles.veiculoListTitle}>Selecione o veículo em uso:</Text>
+                                    <ScrollView>
+                                        {veiculos.map((veiculo) => (
+                                            <View key={veiculo.id} style={styles.veiculoItem}>
+                                                <RadioButton
+                                                    value={veiculo.id.toString()}
+                                                    status={selectedVeiculo === veiculo.id ? 'checked' : 'unchecked'}
+                                                    onPress={() => handleSelectVeiculo(veiculo.id)} // Desabilita o RadioButton se o veículo não estiver em uso
+                                                />
+                                                <Text>{veiculo.modelo} ({veiculo.placa})</Text>
+                                            </View>
+                                        ))}
+                                    </ScrollView>
+                                </View>
+                            </>
+                        ) : (
+                            <View style={styles.containerNoUser} >
+                                <View style={styles.imagemContainer}>
+                                    <Image
+                                        source={require("@/assets/images/invalido.png")}
+                                        style={styles.logo} resizeMode="contain"
+                                    />
+                                </View>
+                                <Text style={styles.inactiveText}>
+                                    Sua conta está inativa. Entre em contato com o administrador para ativá-la.
                                 </Text>
-                            )}
-
-                            {/* Lista de veículos com RadioButton */}
-                            <View style={styles.veiculoList}>
-                                <Text style={styles.veiculoListTitle}>Selecione o veículo em uso:</Text>
-                                <ScrollView>
-                                    {veiculos.map((veiculo) => (
-                                        <View key={veiculo.id} style={styles.veiculoItem}>
-                                            <RadioButton
-                                                value={veiculo.id.toString()}
-                                                status={selectedVeiculo === veiculo.id ? 'checked' : 'unchecked'}
-                                                onPress={() => handleSelectVeiculo(veiculo.id)} // Desabilita o RadioButton se o veículo não estiver em uso
-                                            />
-                                            <Text>{veiculo.modelo} ({veiculo.placa})</Text>
-                                        </View>
-                                    ))}
-                                </ScrollView>
                             </View>
-                        </>
-                    ) : (
-                        <Text style={styles.inactiveText}>
-                            Sua conta está inativa. Entre em contato com o administrador para ativá-la.
-                        </Text>
-                    )}
-
-                    <Button title="Sair" onPress={handleLogout} color="#FF0000" />
-                </>
-            ) : (
-                <Text style={styles.loadingText}>Carregando...</Text>
-            )}
-        </View>
+                        )}
+                    </>
+                ) : (
+                    <View style={styles.containerNoUser} >
+                        <Text style={styles.loadingText}>Carregando...</Text>
+                    </View>
+                )
+                }
+            </View >
+        </Provider >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
         backgroundColor: "#f8f9fa",
     },
+    containerNoUser: {
+        display: 'flex',
+        justifyContent: 'center',
+        height: '80%',
+        padding: 20
+    },
+    menuSuperior: {
+        width: "100%",
+        backgroundColor: "#6950a5", // Cor de fundo do menu superior
+        paddingVertical: 20, // Adiciona padding para o menu
+        alignItems: "center",
+        flexDirection: "row", // Alinha o texto e o ícone na horizontal
+        justifyContent: "space-between", // Espaçamento entre os itens
+    },
     welcomeText: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: "bold",
-        color: "#333",
-        marginBottom: 20,
+        color: "#fff",
+        paddingHorizontal: 20
+    },
+    imagemContainer: {
+        display: 'flex',
+        width: '100%',
+    },
+    logo: {
+        width: "100%",
+        height: 400
     },
     loadingText: {
         fontSize: 18,
@@ -255,9 +291,7 @@ const styles = StyleSheet.create({
     },
     inactiveText: {
         fontSize: 18,
-        color: "#FF0000",
         textAlign: "center",
-        marginVertical: 20,
     },
     infoText: {
         fontSize: 18,
