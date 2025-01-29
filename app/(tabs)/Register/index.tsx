@@ -27,6 +27,7 @@ export default function RegisterScreen() {
     const [local, setLocal] = useState<string>("");
     const [locals, setLocals] = useState<{ id: string; nome: string }[]>([]);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         axios.get(`${API_URL}/locais`)
@@ -44,23 +45,28 @@ export default function RegisterScreen() {
     };
 
     const handleRegister = async () => {
+        setLoading(true);
         if (!name || !cpf || !email || !password || !confirmPassword || !local) {
             Alert.alert("Erro", "Todos os campos são obrigatórios!");
+            setLoading(false);
             return;
         }
 
         if (local === "" || local === '0') {
             Alert.alert("Erro", "Por favor, selecione um local!");
+            setLoading(false);
             return;
         }
 
         if (!validateEmail(email)) {
             Alert.alert("Erro", "Email inválido!");
+            setLoading(false);
             return;
         }
 
         if (password !== confirmPassword) {
             Alert.alert("Erro", "As senhas não coincidem!");
+            setLoading(false);
             return;
         }
 
@@ -83,6 +89,7 @@ export default function RegisterScreen() {
             Alert.alert("Sucesso", "Conta criada com sucesso!");
             navigate(- 1);
         } catch (error: any) {
+            setLoading(false);
             if (error.response) {
                 alert(error.response.data);
             } else {
@@ -157,7 +164,7 @@ export default function RegisterScreen() {
                     onChangeText={setConfirmPassword}
                     secureTextEntry
                 />
-                <CustomButton title="Cadastrar" onPress={handleRegister} />
+                <CustomButton title="Cadastrar" onPress={handleRegister} loading={false} />
             </ScrollView>
         </View>
     );

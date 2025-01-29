@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Alert, StyleSheet, Text, TouchableOpacity, Image } from "react-native";
+import { View, Alert, StyleSheet, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import CustomButton from "@/components/Button";
 import InputField from "@/components/InputField";
 import { useNavigate } from "react-router-native"; // Usando useNavigate do react-router-native
@@ -12,9 +12,11 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export default function LoginScreen() {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate(); // Substituindo useNavigation do react-navigation
 
     async function handleLogin() {
+        setLoading(true);
         try {
             // Requisição para login
             const loginResponse = await axios.post(`${API_URL}/login`, {
@@ -44,6 +46,7 @@ export default function LoginScreen() {
             // Redireciona para a tela inicial
             navigate("/home");
         } catch (error) {
+            setLoading(false);
             console.error("Erro ao realizar login:", error);
             Alert.alert("Erro", "Credenciais inválidas ou problema ao validar o acesso.");
         }
@@ -52,37 +55,39 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             {/* Logo */}
-            <View style={styles.imagemContainer}>
-                <Image
-                    source={require("@/assets/images/QR_VAccess_logo.png")}
-                    style={styles.logo} resizeMode="cover"
-                />
-            </View>
-            <View style={styles.content}>
-                {/* Título */}
-                <Text style={styles.title}>Login</Text>
+            <ScrollView>
+                <View style={styles.imagemContainer}>
+                    <Image
+                        source={require("@/assets/images/QR_VAccess_logo.png")}
+                        style={styles.logo} resizeMode="cover"
+                    />
+                </View>
+                <View style={styles.content}>
+                    {/* Título */}
+                    <Text style={styles.title}>Login</Text>
 
-                {/* Campos de entrada */}
-                <InputField
-                    label="Email"
-                    value={username}
-                    onChangeText={setUsername}
-                />
-                <InputField
-                    label="Senha"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
+                    {/* Campos de entrada */}
+                    <InputField
+                        label="Email"
+                        value={username}
+                        onChangeText={setUsername}
+                    />
+                    <InputField
+                        label="Senha"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                    />
 
-                {/* Botão de login */}
-                <CustomButton title="Login" onPress={handleLogin} />
+                    {/* Botão de login */}
+                    <CustomButton title="Login" onPress={handleLogin} loading={loading} />
 
-                {/* Link para cadastro */}
-                <TouchableOpacity onPress={() => navigate("/register")}>
-                    <Text style={styles.linkText}>Ainda não tem conta? Cadastre-se</Text>
-                </TouchableOpacity>
-            </View>
+                    {/* Link para cadastro */}
+                    <TouchableOpacity onPress={() => navigate("/register")}>
+                        <Text style={styles.linkText}>Ainda não tem conta? Cadastre-se</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         </View >
     );
 }
