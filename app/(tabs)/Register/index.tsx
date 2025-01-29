@@ -5,6 +5,7 @@ import {
     Alert,
     Text,
     TouchableOpacity,
+    ScrollView, Image
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import CustomButton from "@/components/Button";
@@ -92,54 +93,72 @@ export default function RegisterScreen() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigate(-1)}
-            >
-                <Icon name="arrow-back" size={24} />
-            </TouchableOpacity>
-
-            <InputField label="Nome" value={name} onChangeText={setName} />
-
-            <TextInputMask
-                type={"cpf"}
-                value={cpf}
-                onChangeText={setCpf}
-                style={styles.input}
-                placeholder="CPF"
-            />
-
-            <InputField
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-            />
-            <View style={styles.pickerContainer}>
-                <Picker
-                    selectedValue={local}
-                    onValueChange={(itemValue) => setLocal(itemValue)}
-                    style={styles.picker}
-                >
-                    <Picker.Item label="Selecione o Local" value="0" />
-                    {locals.map((loc) => (
-                        <Picker.Item key={loc.id} label={loc.nome} value={loc.id} />
-                    ))}
-                </Picker>
+            {/* Cabeçalho */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigate(-1)}>
+                    <Icon name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Cadastre-se</Text>
             </View>
-            <InputField
-                label="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <InputField
-                label="Confirmação de Senha"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-            />
-            <CustomButton title="Cadastrar" onPress={handleRegister} />
+
+            {/* Conteúdo com ScrollView */}
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.imagemContainer}>
+                    <Image
+                        source={require("@/assets/images/cadastro-condutor.png")}
+                        style={styles.logo} resizeMode="cover"
+                    />
+                </View>
+                <InputField label="Nome" value={name} onChangeText={setName} />
+
+                <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>CPF</Text>
+                    <TextInputMask
+                        type={"cpf"}
+                        value={cpf}
+                        onChangeText={setCpf}
+                        style={styles.input}
+                        placeholder="CPF"
+                    />
+                </View>
+
+                <InputField
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                />
+
+                <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>Local</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            selectedValue={local}
+                            onValueChange={(itemValue) => setLocal(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Selecione o Local" value="0" />
+                            {locals.map((loc) => (
+                                <Picker.Item key={loc.id} label={loc.nome} value={loc.id} />
+                            ))}
+                        </Picker>
+                    </View>
+                </View>
+
+                <InputField
+                    label="Senha"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+                <InputField
+                    label="Confirmação de Senha"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                />
+                <CustomButton title="Cadastrar" onPress={handleRegister} />
+            </ScrollView>
         </View>
     );
 }
@@ -147,7 +166,32 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
+        backgroundColor: "#fff",
+    },
+    imagemContainer: {
+        display: 'flex',
+        width: '100%',
+        padding: 0,
+        margin: 0,
+    },
+    logo: {
+        width: "100%",
+        height: 260
+    },
+    header: {
+        backgroundColor: "#6950a5",
+        height: 60,
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 10,
+    },
+    headerTitle: {
+        color: "#fff",
+        fontSize: 20,
+        fontWeight: "bold",
+        marginLeft: 10,
+    },
+    scrollContent: {
         padding: 20,
     },
     backButton: {
@@ -156,12 +200,19 @@ const styles = StyleSheet.create({
         left: 20,
         zIndex: 1,
     },
+    fieldContainer: {
+        marginBottom: 15,
+    },
+    label: {
+        fontSize: 16,
+        color: "#333",
+        marginBottom: 5,
+    },
     pickerContainer: {
         borderWidth: 1,
         borderColor: "gray",
         borderRadius: 5,
-        marginVertical: 10,
-        overflow: "hidden"
+        overflow: "hidden",
     },
     picker: {
         height: 50,
