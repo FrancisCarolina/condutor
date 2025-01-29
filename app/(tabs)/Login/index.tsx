@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { View, Alert, StyleSheet, Text, TouchableOpacity, Image } from "react-native";
 import CustomButton from "@/components/Button";
 import InputField from "@/components/InputField";
 import { useNavigate } from "react-router-native"; // Usando useNavigate do react-router-native
@@ -51,31 +51,69 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <InputField
-                label="Email"
-                value={username}
-                onChangeText={setUsername}
-            />
-            <InputField
-                label="Senha"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-            <CustomButton title="Login" onPress={handleLogin} />
+            {/* Logo */}
+            <View style={styles.imagemContainer}>
+                <Image
+                    source={require("@/assets/images/QR_VAccess_logo.png")}
+                    style={styles.logo} resizeMode="cover"
+                />
+            </View>
+            <View style={styles.content}>
+                {/* Título */}
+                <Text style={styles.title}>Login</Text>
 
-            <TouchableOpacity onPress={() => navigate("/register")}>
-                <Text style={styles.linkText}>Ainda não tem conta? Cadastre-se</Text>
-            </TouchableOpacity>
-        </View>
+                {/* Campos de entrada */}
+                <InputField
+                    label="Email"
+                    value={username}
+                    onChangeText={setUsername}
+                />
+                <InputField
+                    label="Senha"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+
+                {/* Botão de login */}
+                <CustomButton title="Login" onPress={handleLogin} />
+
+                {/* Link para cadastro */}
+                <TouchableOpacity onPress={() => navigate("/register")}>
+                    <Text style={styles.linkText}>Ainda não tem conta? Cadastre-se</Text>
+                </TouchableOpacity>
+            </View>
+        </View >
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        display: 'flex',
         justifyContent: "center",
-        padding: 20,
+    }, imagemContainer: {
+        display: 'flex',
+        width: '100%',
+        padding: 0,
+        margin: 0,
+        marginBottom: 50
+    },
+    logo: {
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: "100%",
+        height: 250
+    }, content: {
+        padding: 20
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 20,
+        color: "#333",
+        marginTop: 220,
     },
     linkText: {
         marginTop: 10,
