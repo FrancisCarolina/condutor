@@ -21,6 +21,8 @@ export async function deslogar() {
     try {
         await AsyncStorage.removeItem('authToken');
         await AsyncStorage.removeItem('userId');
+        await AsyncStorage.removeItem('condutorId');
+        await AsyncStorage.removeItem('nomeCondutor');
     } catch (error) {
         console.error('Erro ao deslogar:', error);
     }
@@ -59,5 +61,40 @@ export async function obterToken(): Promise<string | null> {
     } catch (error) {
         console.error('Erro ao obter o token do usuário:', error);
         return null;
+    }
+}
+
+export async function obterCondutorId(): Promise<string | null> {
+    try {
+        return await AsyncStorage.getItem('condutorId');
+    } catch (error) {
+        console.error('Erro ao obter o ID do condutor:', error);
+        return null;
+    }
+}
+
+export async function setarCondutorId(condutorId: number) {
+    try {
+        await AsyncStorage.setItem('condutorId', condutorId.toString());
+    } catch (error) {
+        console.error('Erro ao salvar condutorId:', error);
+    }
+}
+
+
+export async function obterNomeCondutor(): Promise<string | null> {
+    try {
+        return await AsyncStorage.getItem('nomeCondutor');
+    } catch (error) {
+        console.error('Erro ao obter o ID do condutor:', error);
+        return null;
+    }
+}
+
+export async function setarNomeCondutor(nomeCondutor: string) {
+    try {
+        await AsyncStorage.setItem('nomeCondutor', nomeCondutor);
+    } catch (error) {
+        console.error('Erro ao salvar condutorId:', error);
     }
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, Image, ScrollView, ActivityIndicator } from "react-native"; // Importe o ActivityIndicator
 import { useNavigate } from "react-router-native";
 import QRCode from "react-native-qrcode-svg";
-import { obterUserId, obterToken, deslogar } from "@/utils/storage";
+import { obterUserId, obterToken, deslogar, setarCondutorId, setarNomeCondutor } from "@/utils/storage";
 import axios from "axios";
 import Constants from 'expo-constants';
 import { RadioButton, Menu, Divider, IconButton, Provider } from 'react-native-paper'; // Importando o Provider
@@ -73,6 +73,8 @@ export default function HomePage() {
                 const { nome, ativo, id } = response.data;
                 setCondutorId(id);
                 setUserName(nome);
+                setarCondutorId(id);
+                setarNomeCondutor(nome);
                 if (nome && ativo) {
                     try {
                         const responseVeiculos = await axios.get(
@@ -115,6 +117,10 @@ export default function HomePage() {
             Alert.alert("Erro", "Não foi possível sair da conta.");
         }
     };
+
+    const handleNewVeiculos = () => {
+        navigate("/veiculos");
+    }
 
     const gerarCodigo = async (idVeiculo: number, idCondutor: number | null) => {
         try {
@@ -195,7 +201,7 @@ export default function HomePage() {
                                     <>
                                         <Menu.Item onPress={handleLogout} title="Perfil" />
                                         <Divider />
-                                        <Menu.Item onPress={handleLogout} title="Veículos" />
+                                        <Menu.Item onPress={handleNewVeiculos} title="Veículos" />
                                         <Divider />
                                     </>
                                 }
@@ -217,7 +223,7 @@ export default function HomePage() {
                                         <Text style={styles.infoText}>
                                             Cadastre um veículo para gerar seu código de acesso.
                                         </Text>
-                                        <CustomButton title="Cadastrar Veículo" onPress={() => { }} loading={false} />
+                                        <CustomButton title="Cadastrar Veículo" onPress={handleNewVeiculos} loading={false} />
 
                                     </View>
 
