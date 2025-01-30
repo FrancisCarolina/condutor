@@ -6,6 +6,7 @@ import { obterUserId, obterToken, deslogar } from "@/utils/storage";
 import axios from "axios";
 import Constants from 'expo-constants';
 import { RadioButton, Menu, Divider, IconButton, Provider } from 'react-native-paper'; // Importando o Provider
+import CustomButton from "@/components/Button";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -190,8 +191,15 @@ export default function HomePage() {
                                     />
                                 }
                             >
+                                {isActive &&
+                                    <>
+                                        <Menu.Item onPress={handleLogout} title="Perfil" />
+                                        <Divider />
+                                        <Menu.Item onPress={handleLogout} title="Veículos" />
+                                        <Divider />
+                                    </>
+                                }
                                 <Menu.Item onPress={handleLogout} title="Logout" />
-                                <Divider />
                             </Menu>
                         </View>
 
@@ -205,13 +213,18 @@ export default function HomePage() {
                                         color="#000000"
                                     />
                                 ) : (
-                                    <Text style={styles.infoText}>
-                                        Cadastre um veículo para gerar seu código de acesso.
-                                    </Text>
+                                    <View>
+                                        <Text style={styles.infoText}>
+                                            Cadastre um veículo para gerar seu código de acesso.
+                                        </Text>
+                                        <CustomButton title="Cadastrar Veículo" onPress={() => { }} loading={false} />
+
+                                    </View>
+
                                 )}
 
                                 {/* Lista de veículos com RadioButton */}
-                                <View style={styles.veiculoList}>
+                                {veiculos && veiculos.length > 0 && < View style={styles.veiculoList}>
                                     <Text style={styles.veiculoListTitle}>Selecione o veículo em uso:</Text>
                                     <ScrollView>
                                         {veiculos.map((veiculo) => (
@@ -225,7 +238,7 @@ export default function HomePage() {
                                             </View>
                                         ))}
                                     </ScrollView>
-                                </View>
+                                </View>}
                             </View>
                         ) : (
                             <View style={styles.containerNoUser} >
