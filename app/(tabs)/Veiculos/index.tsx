@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Constants from 'expo-constants';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, StyleSheet, Alert, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
 import { Menu, Divider, IconButton, Button } from 'react-native-paper';
 import { deslogar, obterNomeCondutor, obterToken, obterCondutorId } from "@/utils/storage";
 import { useNavigate } from "react-router-native";
@@ -12,6 +12,7 @@ export default function VeiculosPage() {
     const [menuVisible, setMenuVisible] = useState(false);
     const [userName, setUserName] = useState<string | null>(null);
     const [veiculos, setVeiculos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true); // Loader state
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -31,9 +32,9 @@ export default function VeiculosPage() {
                 setUserName(nomeCondutor);
             } catch (erro) {
                 console.log("Erro em recuperar o nome do condutor: ", erro);
-
             }
-        }
+        };
+
         const fetchVeiculosData = async () => {
             try {
                 const token = await obterToken();
@@ -54,8 +55,11 @@ export default function VeiculosPage() {
                 setVeiculos(responseVeiculos.data);
             } catch (error) {
                 console.log("Erro em carregar veiculos: ", error);
+            } finally {
+                setLoading(false); // Stop the loader
             }
-        }
+        };
+
         fetchVeiculosData();
         getNomeCondutor();
     }, []);
@@ -86,39 +90,52 @@ export default function VeiculosPage() {
         </View>
     );
 
-    return <View style={styles.container}>
-        <View style={styles.menuSuperior}>
-            <TouchableOpacity onPress={() => navigate(-1)}>
-                <Icon name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
-            <Menu
-                visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
-                anchor={
-                    <IconButton
-                        icon="dots-vertical"
-                        onPress={() => setMenuVisible(true)}
+    return (
+        <View style={styles.container}>
+            <View style={styles.menuSuperior}>
+                <TouchableOpacity onPress={() => navigate(-1)}>
+                    <Icon name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+                <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                <Menu
+                    visible={menuVisible}
+                    onDismiss={() => setMenuVisible(false)}
+                    anchor={
+                        <IconButton
+                            icon="dots-vertical"
+                            onPress={() => setMenuVisible(true)}
+                        />
+                    }
+                >
+                    <Menu.Item onPress={handleLogout} title="Perfil" />
+                    <Divider />
+                    <Menu.Item onPress={() => { }} title="Veículos" />
+                    <Divider />
+                    <Menu.Item onPress={handleLogout} title="Logout" />
+                </Menu>
+            </View>
+            <View style={styles.content}>
+                {loading ? (
+                    <ActivityIndicator size="large" color="#6950a5" style={styles.loader} />
+                ) : (
+                    <FlatList
+                        data={veiculos}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderVeiculo}
                     />
-                }
+                )}
+            </View>
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => {
+                    navigate("/novoVeiculo");
+                }}
             >
-                <Menu.Item onPress={handleLogout} title="Perfil" />
-                <Divider />
-                <Menu.Item onPress={() => { }} title="Veículos" />
-                <Divider />
-                <Menu.Item onPress={handleLogout} title="Logout" />
-            </Menu>
+                <Icon name="add" size={28} color="#fff" />
+            </TouchableOpacity>
         </View>
-        <View style={styles.content}>
-            <FlatList
-                data={veiculos}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={renderVeiculo}
-            />
-        </View>
-    </View >
+    );
 }
-
 
 const styles = StyleSheet.create({
     container: {
@@ -175,5 +192,21 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         marginHorizontal: 4,
+    },
+    fab: {
+        position: "absolute",
+        bottom: 16,
+        right: 16,
+        backgroundColor: "#6950a5",
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: "center",
+        justifyContent: "center",
+        elevation: 4,
+    }, loader: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
 });
