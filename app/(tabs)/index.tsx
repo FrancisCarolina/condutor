@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/changeLogin" element={<ChangeCredentialsScreen />} />
         <Route path="/veiculos" element={<VeiculosPage />} />
         <Route path="/novoVeiculo" element={<NovoVeiculosPage />} />
-        <Route path="/editVeiculo/:id" element={<EditVeiculoPage />} />
+        <Route path="/editVeiculo/:idVeiculo" element={<EditVeiculoPage />} />
       </Routes>
     </NativeRouter>
   );
