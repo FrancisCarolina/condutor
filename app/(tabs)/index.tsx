@@ -7,6 +7,7 @@ import SplashScreen from "@/app/(tabs)/Splash";
 import ChangeCredentialsScreen from "./ChangeLogin";
 import VeiculosPage from "./Veiculos";
 import NovoVeiculosPage from "./NovoVeiculo";
+import EditVeiculoPage from "./EditVeiculo";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/changeLogin" element={<ChangeCredentialsScreen />} />
         <Route path="/veiculos" element={<VeiculosPage />} />
         <Route path="/novoVeiculo" element={<NovoVeiculosPage />} />
+        <Route path="/editVeiculo/:id" element={<EditVeiculoPage />} />
       </Routes>
     </NativeRouter>
   );

@@ -117,7 +117,9 @@ export default function HomePage() {
             Alert.alert("Erro", "Não foi possível sair da conta.");
         }
     };
-
+    const handleVeiculos = () => {
+        navigate("/veiculos");
+    }
     const handleNewVeiculos = () => {
         navigate("/novoVeiculo");
     }
@@ -201,7 +203,7 @@ export default function HomePage() {
                                     <>
                                         <Menu.Item onPress={handleLogout} title="Perfil" />
                                         <Divider />
-                                        <Menu.Item onPress={handleNewVeiculos} title="Veículos" />
+                                        <Menu.Item onPress={handleVeiculos} title="Veículos" />
                                         <Divider />
                                     </>
                                 }

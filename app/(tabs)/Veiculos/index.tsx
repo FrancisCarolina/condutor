@@ -74,7 +74,7 @@ export default function VeiculosPage() {
             <View style={styles.cardActions}>
                 <Button
                     mode="outlined"
-                    onPress={() => { }}
+                    onPress={() => navigate(`/editVeiculo/${item.id}`)}
                     style={styles.actionButton}
                 >
                     Editar
