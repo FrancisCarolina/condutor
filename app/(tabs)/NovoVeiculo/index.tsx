@@ -6,6 +6,7 @@ import { deslogar, obterNomeCondutor, obterToken, obterCondutorId } from "@/util
 import { useNavigate } from "react-router-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+import CustomButton from "@/components/Button";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function NovoVeiculosPage() {
@@ -16,6 +17,7 @@ export default function NovoVeiculosPage() {
     const [placa, setPlaca] = useState("");
     const [ano, setAno] = useState("");
     const [cor, setCor] = useState("");
+    const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -42,6 +44,13 @@ export default function NovoVeiculosPage() {
     }, []);
 
     const handleSave = async () => {
+        setLoader(true);
+        if (!marca || !modelo || !placa || !ano || !cor) {
+            Alert.alert("Erro", "Todos os campos são obrigatórios.");
+            setLoader(false);
+            return;
+        }
+
         try {
             const token = await obterToken();
             const id = await obterCondutorId();
@@ -61,12 +70,15 @@ export default function NovoVeiculosPage() {
                 }
             );
             Alert.alert("Sucesso", "Veículo cadastrado com sucesso!");
-            navigate("/veiculos");
+            setLoader(false);
+            navigate(-1);
         } catch (error) {
+            setLoader(false);
             console.error("Erro ao salvar veículo: ", error);
             Alert.alert("Erro", "Não foi possível salvar o veículo.");
         }
     };
+
 
     return (
         <View style={styles.container}>
@@ -145,14 +157,10 @@ export default function NovoVeiculosPage() {
                             onChangeText={setCor}
                             placeholderTextColor="#aaa"
                         />
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <Button mode="outlined" onPress={() => navigate(-1)} style={styles.button}>Cancelar</Button>
-                        <Button mode="contained" onPress={handleSave} style={styles.button}>Salvar</Button>
-                    </View>
+                    </View> <CustomButton title="Salvar" onPress={handleSave} loading={loader} />
                 </ScrollView>
-            </View>
-        </View>
+            </View >
+        </View >
     );
 }
 
@@ -203,13 +211,5 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: "transparent",
         color: "#000",
-    },
-    buttonContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    button: {
-        width: "48%",
-        borderColor: "#6950a5"
     },
 });
