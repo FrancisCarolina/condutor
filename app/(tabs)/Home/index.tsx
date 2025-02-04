@@ -119,7 +119,7 @@ export default function HomePage() {
     };
 
     const handleNewVeiculos = () => {
-        navigate("/veiculos");
+        navigate("/novoVeiculo");
     }
 
     const gerarCodigo = async (idVeiculo: number, idCondutor: number | null) => {
@@ -221,7 +221,7 @@ export default function HomePage() {
                                 ) : (
                                     <View>
                                         <Text style={styles.infoText}>
-                                            Cadastre um veículo para gerar seu código de acesso.
+                                            Cadastre ou selecione um veículo para gerar seu código de acesso.
                                         </Text>
                                         <CustomButton title="Cadastrar Veículo" onPress={handleNewVeiculos} loading={false} />
 
