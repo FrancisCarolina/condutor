@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Constants from 'expo-constants';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
-import { Menu, Divider, IconButton, Button } from 'react-native-paper';
+import { Menu, Divider, IconButton, Button, Dialog, Portal, Paragraph, Provider } from 'react-native-paper';
 import { deslogar, obterNomeCondutor, obterToken, obterCondutorId } from "@/utils/storage";
 import { useNavigate } from "react-router-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function VeiculosPage() {
     const [menuVisible, setMenuVisible] = useState(false);
     const [userName, setUserName] = useState<string | null>(null);
     const [veiculos, setVeiculos] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true); // Loader state
+    const [loading, setLoading] = useState(true);
+    const [selectedVeiculoId, setSelectedVeiculoId] = useState<number | null>(null);
+    const [isModalVisible, setModalVisible] = useState(false); // Estado para o modal
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -25,7 +28,33 @@ export default function VeiculosPage() {
         }
     };
 
+    const fetchVeiculosData = async () => {
+        try {
+            const token = await obterToken();
+            const id = await obterCondutorId();
+            if (!token) {
+                Alert.alert("Erro", "Token não encontrado.");
+                handleLogout();
+                return;
+            }
+            const responseVeiculos = await axios.get(
+                `${API_URL}/veiculo/condutor/${id}`,
+                {
+                    headers: {
+                        "x-access-token": token,
+                    },
+                }
+            );
+            setVeiculos(responseVeiculos.data);
+        } catch (error) {
+            console.log("Erro em carregar veiculos: ", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
+        fetchVeiculosData();
         const getNomeCondutor = async () => {
             try {
                 const nomeCondutor = await obterNomeCondutor();
@@ -34,35 +63,27 @@ export default function VeiculosPage() {
                 console.log("Erro em recuperar o nome do condutor: ", erro);
             }
         };
-
-        const fetchVeiculosData = async () => {
-            try {
-                const token = await obterToken();
-                const id = await obterCondutorId();
-                if (!token) {
-                    Alert.alert("Erro", "Token não encontrado.");
-                    handleLogout();
-                    return;
-                }
-                const responseVeiculos = await axios.get(
-                    `${API_URL}/veiculo/condutor/${id}`,
-                    {
-                        headers: {
-                            "x-access-token": token,
-                        },
-                    }
-                );
-                setVeiculos(responseVeiculos.data);
-            } catch (error) {
-                console.log("Erro em carregar veiculos: ", error);
-            } finally {
-                setLoading(false); // Stop the loader
-            }
-        };
-
-        fetchVeiculosData();
         getNomeCondutor();
     }, []);
+
+    const handleDelete = async () => {
+        if (selectedVeiculoId) {
+            try {
+                const token = await obterToken();
+                await axios.delete(`${API_URL}/veiculos/${selectedVeiculoId}`, {
+                    headers: {
+                        "x-access-token": token,
+                    },
+                });
+                Alert.alert("Sucesso", "Veículo excluído com sucesso.");
+                setModalVisible(false);
+                fetchVeiculosData(); // Recarrega a lista
+            } catch (error) {
+                console.error("Erro ao excluir veículo:", error);
+                Alert.alert("Erro", "Não foi possível excluir o veículo.");
+            }
+        }
+    };
 
     const renderVeiculo = ({ item }: { item: any }) => (
         <View style={styles.card}>
@@ -75,14 +96,17 @@ export default function VeiculosPage() {
                 <Button
                     mode="outlined"
                     onPress={() => navigate(`/editVeiculo/${item.id}`)}
-                    style={styles.actionButton}
+                    style={styles.actionButton} textColor="#6950a5"
                 >
                     Editar
                 </Button>
                 <Button
                     mode="contained"
-                    onPress={() => { }}
-                    style={styles.actionButton}
+                    onPress={() => {
+                        setSelectedVeiculoId(item.id);
+                        setModalVisible(true);
+                    }}
+                    style={styles.actionButton} buttonColor="#6950a5" textColor="#fff"
                 >
                     Excluir
                 </Button>
@@ -91,49 +115,63 @@ export default function VeiculosPage() {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={styles.menuSuperior}>
-                <TouchableOpacity onPress={() => navigate(-1)}>
-                    <Icon name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
-                <Menu
-                    visible={menuVisible}
-                    onDismiss={() => setMenuVisible(false)}
-                    anchor={
-                        <IconButton
-                            icon="dots-vertical"
-                            onPress={() => setMenuVisible(true)}
+        <Provider>
+            <View style={styles.container}>
+                <View style={styles.menuSuperior}>
+                    <TouchableOpacity onPress={() => navigate(-1)}>
+                        <Icon name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                    <Menu
+                        visible={menuVisible}
+                        onDismiss={() => setMenuVisible(false)}
+                        anchor={
+                            <IconButton
+                                icon="dots-vertical"
+                                onPress={() => setMenuVisible(true)}
+                            />
+                        }
+                    >
+                        <Menu.Item onPress={handleLogout} title="Perfil" />
+                        <Divider />
+                        <Menu.Item onPress={() => { }} title="Veículos" />
+                        <Divider />
+                        <Menu.Item onPress={handleLogout} title="Logout" />
+                    </Menu>
+                </View>
+                <View style={styles.content}>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#6950a5" style={styles.loader} />
+                    ) : (
+                        <FlatList
+                            data={veiculos}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={renderVeiculo}
                         />
-                    }
+                    )}
+                </View>
+                <Portal>
+                    <Dialog visible={isModalVisible} onDismiss={() => setModalVisible(false)}>
+                        <Dialog.Title>Confirmação</Dialog.Title>
+                        <Dialog.Content>
+                            <Paragraph>Tem certeza de que deseja excluir este veículo?</Paragraph>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => setModalVisible(false)}>Cancelar</Button>
+                            <Button onPress={handleDelete}>Excluir</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+                <TouchableOpacity
+                    style={styles.fab}
+                    onPress={() => {
+                        navigate("/novoVeiculo");
+                    }}
                 >
-                    <Menu.Item onPress={handleLogout} title="Perfil" />
-                    <Divider />
-                    <Menu.Item onPress={() => { }} title="Veículos" />
-                    <Divider />
-                    <Menu.Item onPress={handleLogout} title="Logout" />
-                </Menu>
+                    <Icon name="add" size={28} color="#fff" />
+                </TouchableOpacity>
             </View>
-            <View style={styles.content}>
-                {loading ? (
-                    <ActivityIndicator size="large" color="#6950a5" style={styles.loader} />
-                ) : (
-                    <FlatList
-                        data={veiculos}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={renderVeiculo}
-                    />
-                )}
-            </View>
-            <TouchableOpacity
-                style={styles.fab}
-                onPress={() => {
-                    navigate("/novoVeiculo");
-                }}
-            >
-                <Icon name="add" size={28} color="#fff" />
-            </TouchableOpacity>
-        </View>
+        </Provider>
     );
 }
 
@@ -191,7 +229,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     actionButton: {
-        marginHorizontal: 4,
+        marginHorizontal: 4, borderColor: "#6950a5"
     },
     fab: {
         position: "absolute",
@@ -204,7 +242,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         elevation: 4,
-    }, loader: {
+    },
+    loader: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
