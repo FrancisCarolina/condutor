@@ -108,6 +108,13 @@ export default function HomePage() {
         fetchUserData();
     }, []);
 
+    useEffect(() => {
+        if (veiculos && veiculos.length === 1 && !selectedVeiculo) {
+            handleSelectVeiculo(veiculos[0].id);
+
+        }
+    }, [veiculos])
+
     const handleLogout = async () => {
         try {
             await deslogar();
@@ -117,6 +124,9 @@ export default function HomePage() {
             Alert.alert("Erro", "Não foi possível sair da conta.");
         }
     };
+    const handlePerfil = () => {
+        navigate("/perfil");
+    }
     const handleVeiculos = () => {
         navigate("/veiculos");
     }
@@ -175,7 +185,7 @@ export default function HomePage() {
 
             setSelectedVeiculo(idVeiculo);
             gerarCodigo(idVeiculo, condutorId);
-            Alert.alert("Sucesso", "Veículo alterado com sucesso.");
+            //Alert.alert("Sucesso", "Veículo alterado com sucesso.");
         } catch (error) {
             console.error("Erro ao alterar veículo:", error);
             Alert.alert("Erro", "Não foi possível alterar o veículo.");
@@ -188,7 +198,7 @@ export default function HomePage() {
                 {userName ? (
                     <>
                         <View style={styles.menuSuperior}>
-                            <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                            <Text style={styles.welcomeText}>Bem-vindo, {userName?.split(" ")[0]}!</Text>
                             <Menu
                                 visible={menuVisible}
                                 onDismiss={() => setMenuVisible(false)}
@@ -201,7 +211,7 @@ export default function HomePage() {
                             >
                                 {isActive &&
                                     <>
-                                        <Menu.Item onPress={handleLogout} title="Perfil" />
+                                        <Menu.Item onPress={handlePerfil} title="Perfil" />
                                         <Divider />
                                         <Menu.Item onPress={handleVeiculos} title="Veículos" />
                                         <Divider />

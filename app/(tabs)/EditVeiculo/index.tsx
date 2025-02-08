@@ -71,6 +71,10 @@ export default function EditVeiculoPage() {
         }
     };
 
+    const handlePerfil = () => {
+        navigate("/perfil");
+    }
+
     const handleSave = async () => {
         setLoader(true);
         if (!marca || !modelo || !placa || !ano || !cor) {
@@ -106,10 +110,12 @@ export default function EditVeiculoPage() {
     return (
         <View style={styles.container}>
             <View style={styles.menuSuperior}>
-                <TouchableOpacity onPress={() => navigate(-1)}>
-                    <Icon name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                <View style={styles.menuSuperiorInicio}>
+                    <TouchableOpacity onPress={() => navigate(-1)}>
+                        <Icon name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.welcomeText}>Bem-vindo, {userName?.split(" ")[0]}!</Text>
+                </View>
                 <Menu
                     visible={menuVisible}
                     onDismiss={() => setMenuVisible(false)}
@@ -120,7 +126,7 @@ export default function EditVeiculoPage() {
                         />
                     }
                 >
-                    <Menu.Item onPress={handleLogout} title="Perfil" />
+                    <Menu.Item onPress={handlePerfil} title="Perfil" />
                     <Divider />
                     <Menu.Item onPress={() => { }} title="Veículos" />
                     <Divider />
@@ -200,12 +206,19 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-between",
+    },
+    menuSuperiorInicio: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-start",
         paddingHorizontal: 10,
+        alignItems: "center"
     },
     welcomeText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
         color: "#fff",
+        paddingHorizontal: 20,
     },
     content: {
         flex: 1,

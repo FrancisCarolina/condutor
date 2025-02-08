@@ -8,6 +8,7 @@ import ChangeCredentialsScreen from "./ChangeLogin";
 import VeiculosPage from "./Veiculos";
 import NovoVeiculosPage from "./NovoVeiculo";
 import EditVeiculoPage from "./EditVeiculo";
+import PerfilPage from "./Perfil";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/veiculos" element={<VeiculosPage />} />
         <Route path="/novoVeiculo" element={<NovoVeiculosPage />} />
         <Route path="/editVeiculo/:idVeiculo" element={<EditVeiculoPage />} />
+        <Route path="/perfil" element={<PerfilPage />} />
       </Routes>
     </NativeRouter>
   );

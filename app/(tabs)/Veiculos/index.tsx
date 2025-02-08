@@ -84,6 +84,10 @@ export default function VeiculosPage() {
             }
         }
     };
+    const handlePerfil = () => {
+        navigate("/perfil");
+    }
+
 
     const renderVeiculo = ({ item }: { item: any }) => (
         <View style={styles.card}>
@@ -118,10 +122,12 @@ export default function VeiculosPage() {
         <Provider>
             <View style={styles.container}>
                 <View style={styles.menuSuperior}>
-                    <TouchableOpacity onPress={() => navigate(-1)}>
-                        <Icon name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={styles.welcomeText}>Bem-vindo, {userName}!</Text>
+                    <View style={styles.menuSuperiorInicio}>
+                        <TouchableOpacity onPress={() => navigate(-1)}>
+                            <Icon name="arrow-back" size={24} color="#fff" />
+                        </TouchableOpacity>
+                        <Text style={styles.welcomeText}>Bem-vindo, {userName?.split(" ")[0]}!</Text>
+                    </View>
                     <Menu
                         visible={menuVisible}
                         onDismiss={() => setMenuVisible(false)}
@@ -132,7 +138,7 @@ export default function VeiculosPage() {
                             />
                         }
                     >
-                        <Menu.Item onPress={handleLogout} title="Perfil" />
+                        <Menu.Item onPress={handlePerfil} title="Perfil" />
                         <Divider />
                         <Menu.Item onPress={() => { }} title="Veículos" />
                         <Divider />
@@ -187,6 +193,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flexDirection: "row",
         justifyContent: "space-between",
+    },
+    menuSuperiorInicio: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        paddingHorizontal: 10,
+        alignItems: "center"
     },
     welcomeText: {
         fontSize: 20,
